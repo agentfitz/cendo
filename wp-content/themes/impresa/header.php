@@ -64,7 +64,7 @@ if($favicon =="" ){
 <!-- //      Javascript Files        // -->
 <!-- ////////////////////////////////// -->
 <script type="text/javascript">
-	 Cufon.replace('h1') ('h1 a') ('h2') ('h3') ('h4') ('h5') ('h6') ('#topnavigation li', { hover: true});
+	 Cufon.replace('h1')('h1 a') ('h2') ('h3') ('h4') ('h5') ('h6') ('#topnavigation li', { hover: true});
 </script>
 <?php 
 	$effect = get_option('templatesquare_slider_effect');
@@ -80,18 +80,18 @@ if($favicon =="" ){
             timeout: 5000,  // milliseconds between slide transitions (0 to disable auto advance)
             fx:      'fade', // choose your transition type, ex: fade, scrollUp, shuffle, etc...            
             pause:   0,	  // true to enable "pause on hover"
-			pager:   '.pager_cycle',  // selector for element to use as pager container
-			cleartypeNoBg:true, // set to true to disable extra cleartype fixing (leave false to force background color setting on slides) 
-            pauseOnPagerHover: 0 // true to pause when hovering over pager link
+						pager:   '.pager_cycle',  // selector for element to use as pager container
+						cleartypeNoBg:true, // set to true to disable extra cleartype fixing (leave false to force background color setting on slides) 
+            pauseOnPagerHover: 1 // true to pause when hovering over pager link
         });
 		
          $('.boxslideshow2').cycle({
             timeout: 5000,  // milliseconds between slide transitions (0 to disable auto advance)
             fx:      'scrollVert', // choose your transition type, ex: fade, scrollUp, shuffle, etc...            
             pause:   0,	  // true to enable "pause on hover"
-			pager:   '.pager_cycle',  // selector for element to use as pager container
-			cleartypeNoBg:true, // set to true to disable extra cleartype fixing (leave false to force background color setting on slides) 
-            pauseOnPagerHover: 0 // true to pause when hovering over pager link
+						pager:   '.pager_cycle',  // selector for element to use as pager container
+						cleartypeNoBg:true, // set to true to disable extra cleartype fixing (leave false to force background color setting on slides) 
+            pauseOnPagerHover: 1 // true to pause when hovering over pager link
         });
 		
 		/* for portfolio prettyPhoto */
@@ -107,8 +107,16 @@ if($favicon =="" ){
 			animSpeed:<?php echo $speed; ?>, //Slide transition speed
 			pauseTime:<?php echo $timeout; ?>,
 			directionNav:false, //Next &amp; Prev
-			startSlide:0 //Set starting Slide (0 index)
+			startSlide:0, //Set starting Slide (0 index)
+			afterChange: updateSliderTitles
 		});
+		
+		function updateSliderTitles(){
+			Cufon.replace('span.sliderTitle');
+			Cufon.refresh();
+		}
+		updateSliderTitles();
+		
 	});
 	 
 </script>

@@ -70,4 +70,25 @@ require_once $includes_path . 'shortcode.php';
 //Loading jQuery
 require_once $includes_path . 'theme-scripts.php';
 
+
+
+?>
+
+
+<?php
+/* -- Fitz -- this block of codes stops WordPress from randomly adding br tags for no reason
+Plugin Name: Better wpautop 
+Plugin URI: http://www.simonbattersby.com/blog/plugin-to-stop-wordpress-adding-br-tags/
+Description: Amend the wpautop filter to stop wordpress doing its own thing
+Version: 1.0
+Author: Simon Battersby
+Author URI: http://www.simonbattersby.com
+*/
+
+function better_wpautop($pee){
+	return wpautop($pee, $br=0);
+}
+
+remove_filter('the_content','wpautop');
+add_filter('the_content','better_wpautop');
 ?>

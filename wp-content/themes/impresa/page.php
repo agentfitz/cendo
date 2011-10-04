@@ -21,7 +21,7 @@ yoast_breadcrumb('<div id="con-breadcrumbs"><div id="breadcrumbs">','</div></div
 
 <div id="main">
 	<div id="content">
-	
+
 		<?php 
 		if ( is_active_sidebar('before-content') ) {
 		get_sidebar('before-content');

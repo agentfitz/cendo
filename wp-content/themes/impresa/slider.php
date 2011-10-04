@@ -55,5 +55,15 @@
 						echo '</div>';
 					}
 				?>
+				
+			<div style="background: #fff; opacity: .8; position: absolute; top: 0px; left: 690px; padding: 0px; margin: 20px; width: 200px; z-index: 100;">
+				<div style="background: #6895b6; height: 20px; padding: 6px 15px 8px 15px;">
+					<h2 style="color: white; font-size: 16px;">Patient Portal</h2>
+				</div>
+				<div style="padding: 15px 15px 0 15px;">
+					<img src="/wp-content/themes/impresa/images/portalThumb.jpg" />
+					<p>Login to our Patient Portal to schedule appointments, refill prescriptions, and more!</p>
+				</div>
 			</div>
+			</div>			
 			<!-- #header -->
