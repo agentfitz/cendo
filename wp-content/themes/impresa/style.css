@@ -286,7 +286,7 @@ h1, h2, h3, h4, h5, h6{ font-weight:normal; color:#505050;}
 #topnavigation ul{padding:10px 0px 0px 0px; float:right; position:relative;}
 #topnavigation a{
 	display:block;
-	padding:3px 20px;
+	padding:3px 16px;
 	color:#ffffff;
 	text-decoration:none;
 }
@@ -1384,3 +1384,6 @@ height:70px;
 
 span.sliderTitle { color: #fff; font-size: 30px; padding-right: 6px; }
 .nivo-caption p { font-size: 18px; font-weight: normal; }
+
+li#contact_widget-3 div.side-box { padding: 12px; }
+#contactThumb { margin-bottom: 12px; }
