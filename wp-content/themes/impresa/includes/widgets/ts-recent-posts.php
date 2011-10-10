@@ -13,7 +13,7 @@ class TS_RecentPostWidget extends WP_Widget {
     function widget($args, $instance) {		
         extract( $args );
         $title = apply_filters('widget_title', empty($instance['title']) ? __('TS Recent Posts','templatesquare') : $instance['title']);
-		$category = apply_filters('widget_category', $instance['category']);
+				$category = apply_filters('widget_category', $instance['category']);
         ?>
               <?php echo $before_widget; ?>
                   <?php if ( $title )
@@ -53,7 +53,7 @@ class TS_RecentPostWidget extends WP_Widget {
     /** @see WP_Widget::form */
     function form($instance) {				
         $title = esc_attr($instance['title']);
-		$category = esc_attr($instance['category']);
+				$category = esc_attr($instance['category']);
         ?>
             <p><label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:', 'templatesquare'); ?> <input class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" type="text" value="<?php echo $title; ?>" /></label></p>
 			

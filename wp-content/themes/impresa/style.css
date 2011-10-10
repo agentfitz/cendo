@@ -1385,5 +1385,9 @@ height:70px;
 span.sliderTitle { color: #fff; font-size: 30px; padding-right: 6px; }
 .nivo-caption p { font-size: 18px; font-weight: normal; }
 
-li#contact_widget-3 div.side-box { padding: 12px; }
+li.Contact_Widget div.side-box, div#providersSidebarContainer { padding: 12px !important; }
 #contactThumb { margin-bottom: 12px; }
+.addressList { padding: 0; margin: 15px 0; } 
+.addressList li { list-style: none; font-size: 14px; padding: 0 0 5px 0; }
+.providerSideBlock { clear: both; border-bottom: 1px dotted #ccc; margin-bottom: 12px; padding-bottom: 0; }
+.providerSideBlock p { margin-bottom: 10px; }

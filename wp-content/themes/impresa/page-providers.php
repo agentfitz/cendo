@@ -55,6 +55,7 @@ yoast_breadcrumb('<div id="con-breadcrumbs"><div id="breadcrumbs">','</div></div
 				
 				<div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 					<div class="entry-content">
+						<a href="#" name="<?php the_ID() ?>"></a>
 						<?php the_post_thumbnail(); ?>
 						<h2><?php the_title(); ?></h2>
 						<?php the_content( __( 'Continue Reading', 'templatesquare' ) ); ?>

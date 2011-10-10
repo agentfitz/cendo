@@ -45,7 +45,7 @@ class Contact_Widget extends WP_Widget
     // Do Your Widgety Stuff Here...
     echo 
 		"			
-			<img id='contactThumb' src='/wp-content/themes/impresa/images/contactThumb.jpg' width='256' height='125' />
+			<a href='/?page_id=164'><img id='contactThumb' src='/wp-content/themes/impresa/images/contactThumb.jpg' width='256' height='125' /></a>
 			<h5>2605 Blue Ridge Rd., Ste. 190</h5>
 			<h5>Raleigh NC 27607</h5>
 			<h5>919-571-3661, Phone</h5>
