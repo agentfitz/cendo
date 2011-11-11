@@ -26,6 +26,7 @@ function adrotate_insert_input() {
 	$bannercode			= htmlspecialchars(trim($_POST['adrotate_bannercode'], "\t\n "), ENT_QUOTES);
 	$thetime 			= date('U');
 	$active 			= $_POST['adrotate_active'];
+	$sortorder			= strip_tags(htmlspecialchars(trim($_POST['adrotate_sortorder'], "\t\n "), ENT_QUOTES));
 	$image_field		= strip_tags(htmlspecialchars(trim($_POST['adrotate_image'], "\t\n "), ENT_QUOTES));
 	$image_dropdown		= $_POST['adrotate_image_dropdown'];
 	$link				= strip_tags(htmlspecialchars(trim($_POST['adrotate_link'], "\t\n "), ENT_QUOTES));
@@ -50,24 +51,6 @@ function adrotate_insert_input() {
 			$title = 'Ad '.$id;
 		}
 
-		// Determine error states
-		if(
-			strlen($bannercode) < 1 
-			OR (!isset($tracker) AND strlen($link) < 1 AND $advertiser > 0) 		// Didn't enable click-tracking, didn't provide a link, DID set a advertiser
-			OR (isset($tracker) AND strlen($link) < 1) 								// Did use link field but didn't check click-tracking checkmark
-			OR (!isset($tracker) AND strlen($link) > 0) 							// Didn't enable click-tracking but did use the link field
-			OR (!preg_match("/%link%/i", $bannercode) AND $tracker == 'Y')			// Didn't use %link% but enabled clicktracking
-			OR (preg_match("/%link%/i", $bannercode) AND $tracker == 'N')			// Did use %link% but didn't enable clicktracking
-			OR (!preg_match("/%image%/i", $bannercode) AND $image_field != '')		// Didn't use %image% but selected an image
-			AND (!preg_match("/%image%/i", $bannercode) AND $image_dropdown != '')	// Didn't use %image% but selected an image
-			OR (preg_match("/%image%/i", $bannercode) AND $image_field == '')		// Did use %image% but didn't select an image
-			AND (preg_match("/%image%/i", $bannercode) AND $image_dropdown == '')	// Did use %image% but didn't select an image
-		) {
-			$adtype = 'error';
-		} else {
-			$adtype = 'manual';
-		}
-
 		// Sort out dates
 		if(strlen($smonth) == 0 OR !is_numeric($smonth)) 	$smonth 	= gmdate('m');
 		if(strlen($sday) == 0 OR !is_numeric($sday)) 		$sday 		= gmdate('d');
@@ -80,6 +63,9 @@ function adrotate_insert_input() {
 		
 		// Enddate is too early, reset
 		if($enddate <= $startdate) $enddate = $startdate + 345600; // 4 days
+
+		// Validate sort order
+		if(strlen($sortorder) < 1 OR !is_numeric($sortorder) AND ($sortorder < 1 OR $sortorder > 99999)) $sortorder = $id;
 
 		// Sort out click and impressions restrictions
 		if(strlen($maxclicks) < 1 OR !is_numeric($maxclicks))	$maxclicks	= 0;
@@ -98,46 +84,48 @@ function adrotate_insert_input() {
 		
 		// Determine image settings ($image_field has priority!)
 		if(strlen($image_field) > 1) {
-			$image = "field|".$image_field;
+			$imagetype = "field";
+			$image = $image_field;
 		} else {
 			if($image_dropdown == "") {
+				$imagetype = "";
 				$image = "";
 			} else {
-				$image = "dropdown|".get_option('siteurl')."/wp-content/banners/".$image_dropdown;
+				$imagetype = "dropdown";
+				$image = get_option('siteurl')."/wp-content/banners/".$image_dropdown;
 			}
-		}
-/* OBSOLETE IN 3.6 - REMOVE IN FUTURE VERSION?
-		list($type, $file) = explode("|", $imageraw, 2);
-		if($type == "banner") {
-			$image = get_option('siteurl').'/wp-content/banners/'.$file;
-		}
-		
-		if($type == "media") {
-			$image = $wpdb->get_var("SELECT `guid` FROM ".$wpdb->prefix."posts 
-									WHERE `post_type` = 'attachment' 
-									AND (`post_mime_type` = 'image/jpeg' 
-										OR `post_mime_type` = 'image/gif' 
-										OR `post_mime_type` = 'image/png'
-										OR `post_mime_type` = 'application/x-shockwave-flash')
-									AND `guid` LIKE '%".$file."' LIMIT 1;
-									");
-		}
-*/
-
-		// Determine status of ad and what to do next
-		if($adtype == 'empty') {
-			$action = 'new';
-			$wpdb->query("UPDATE `".$wpdb->prefix."adrotate` SET `type` = 'manual' WHERE `id` = '$id';");
-		} else if($adtype == 'error') {
-			$action = 'field_error';
-			$wpdb->query("UPDATE `".$wpdb->prefix."adrotate` SET `type` = 'error' WHERE `id` = '$id';");
-		} else {
-			$action = 'update';
-			$wpdb->query("UPDATE `".$wpdb->prefix."adrotate` SET `type` = 'manual' WHERE `id` = '$id';");
 		}
 
 		// Save the ad to the DB
-		$wpdb->query("UPDATE `".$wpdb->prefix."adrotate` SET `title` = '$title', `bannercode` = '$bannercode', `updated` = '$thetime', `author` = '$author', `active` = '$active', `startshow` = '$startdate', `endshow` = '$enddate', `image` = '$image', `link` = '$link', `tracker` = '$tracker', `maxclicks` = '$maxclicks', `maxshown` = '$maxshown', `targetclicks` = '$targetclicks', `targetimpressions` = '$targetimpressions', `weight` = '$weight' WHERE `id` = '$id';");
+		$wpdb->query("UPDATE 
+						`".$wpdb->prefix."adrotate` 
+					SET 
+						`title` = '$title', 
+						`bannercode` = '$bannercode', 
+						`updated` = '$thetime', 
+						`author` = '$author', 
+						`active` = '$active', 
+						`startshow` = '$startdate', 
+						`endshow` = '$enddate', 
+						`imagetype` = '$imagetype', 
+						`image` = '$image', 
+						`link` = '$link', 
+						`tracker` = '$tracker', 
+						`maxclicks` = '$maxclicks', 
+						`maxshown` = '$maxshown', 
+						`targetclicks` = '$targetclicks', 
+						`targetimpressions` = '$targetimpressions', 
+						`weight` = '$weight', 
+						`sortorder` = '$sortorder' 
+					WHERE 
+						`id` = '$id'
+					;");
+
+
+		// Determine status of ad and what to do next
+		$adstate = adrotate_evaluate_ad($id);
+		if($adstate == true) $adtype = 'error';
+			else $adtype = 'manual';
 
 		// Fetch group records for the ad
 		$groupmeta = $wpdb->get_results("SELECT `group` FROM `".$wpdb->prefix."adrotate_linkmeta` WHERE `ad` = '$id' AND `block` = 0 AND `user` = 0;");
@@ -196,9 +184,13 @@ function adrotate_insert_group() {
 	$name 		= strip_tags(trim($_POST['adrotate_groupname'], "\t\n "));
 	$fallback 	= $_POST['adrotate_fallback'];
 	$ads		= $_POST['adselect'];
+	$sortorder	= strip_tags(htmlspecialchars(trim($_POST['adrotate_sortorder'], "\t\n "), ENT_QUOTES));
 
 	if(current_user_can('adrotate_group_manage')) {
 		if(strlen($name) < 1) $name = 'Group '.$id;
+
+		// Validate sort order
+		if(strlen($sortorder) < 1 OR !is_numeric($sortorder) AND ($sortorder < 1 OR $sortorder > 99999)) $sortorder = $id;
 
 		// Fetch records for the group
 		$linkmeta = $wpdb->get_results("SELECT `ad` FROM `".$wpdb->prefix."adrotate_linkmeta` WHERE `group` = '$id' AND `block` = 0 AND `user` = 0;");
@@ -224,7 +216,7 @@ function adrotate_insert_group() {
 		unset($value);
 
 		// Update the group itself
-		$wpdb->query("UPDATE `".$wpdb->prefix."adrotate_groups` SET `name` = '$name', `fallback` = '$fallback' WHERE `id` = '$id';");
+		$wpdb->query("UPDATE `".$wpdb->prefix."adrotate_groups` SET `name` = '$name', `fallback` = '$fallback', `sortorder` = '$sortorder' WHERE `id` = '$id';");
 		adrotate_return($action, array($id));
 		exit;
 	} else {
@@ -251,11 +243,15 @@ function adrotate_insert_block() {
 	$wrapper_before	= trim($_POST['adrotate_wrapper_before'], "\t\n ");
 	$wrapper_after	= trim($_POST['adrotate_wrapper_after'], "\t\n ");
 	$groups 		= $_POST['groupselect'];
+	$sortorder		= strip_tags(htmlspecialchars(trim($_POST['adrotate_sortorder'], "\t\n "), ENT_QUOTES));
 
 	if(current_user_can('adrotate_block_manage')) {
 		if($adcount < 1 OR $adcount == '' OR !is_numeric($adcount)) $adcount = 1;
 		if($columns < 1 OR $columns == '' OR !is_numeric($columns)) $columns = 1;
 		if(strlen($name) < 1) $name = 'Block '.$id;
+
+		// Validate sort order
+		if(strlen($sortorder) < 1 OR !is_numeric($sortorder) AND ($sortorder < 1 OR $sortorder > 99999)) $sortorder = $id;
 
 		// Fetch records for the block
 		$linkmeta = $wpdb->get_results("SELECT `group` FROM `".$wpdb->prefix."adrotate_linkmeta` WHERE `block` = '$id' AND `ad` = 0 AND `user` = 0;");
@@ -281,7 +277,7 @@ function adrotate_insert_block() {
 		unset($value);
 
 		// Update the block itself
-		$wpdb->query("UPDATE `".$wpdb->prefix."adrotate_blocks` SET `name` = '$name', `adcount` = '$adcount', `columns` = '$columns', `wrapper_before` = '$wrapper_before', `wrapper_after` = '$wrapper_after' WHERE `id` = '$id';");
+		$wpdb->query("UPDATE `".$wpdb->prefix."adrotate_blocks` SET `name` = '$name', `adcount` = '$adcount', `columns` = '$columns', `wrapper_before` = '$wrapper_before', `wrapper_after` = '$wrapper_after', `sortorder` = '$sortorder' WHERE `id` = '$id';");
 		adrotate_return($action, array($id));
 		exit;
 	} else {
@@ -553,6 +549,7 @@ function adrotate_options_submit() {
 	// Jan 24 2011 - Automatic switch for email notifications, added array_unique() to email addresses
 	// Feb 15 2011 - Dashboard debugger
 	// Jul 11 2011 - Added option for impression timer, enhanced several checks for email validation to be compatible with PHP5.3
+	// Aug 10 2011 - Removed sortorder option
 	*/
 
 	// Set and save user roles
@@ -614,11 +611,10 @@ function adrotate_options_submit() {
 	if(strlen($impression_timer) > 0 AND (is_numeric($impression_timer) AND $impression_timer >= 0 AND $impression_timer <= 3600)) {
 		$config['impression_timer'] = $impression_timer;
 	} else {
-		$config['impression_timer'] = 300;
+		$config['impression_timer'] = 10;
 	}
 
 	// Miscellaneous Options
-	$config['sortorder'] = $_POST['adrotate_sortorder'];
 	if(isset($_POST['adrotate_credits'])) 					$config['credits'] 		= 'Y';
 		else 												$config['credits'] 		= 'N';
 	if(isset($_POST['adrotate_widgetalign'])) 				$config['widgetalign'] 	= 'Y';

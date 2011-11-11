@@ -116,6 +116,69 @@ function adrotate_array_unique($array) {
 }
 
 /*-------------------------------------------------------------
+ Name:      adrotate_prepare_evaluate_ads
+
+ Purpose:   Initiate evaluations for errors
+ Receive:   -None-
+ Return:    -None-
+ Since:		3.6.5
+-------------------------------------------------------------*/
+function adrotate_prepare_evaluate_ads() {
+	global $wpdb;
+	
+	// Clean Ad table
+	$wpdb->query("DELETE FROM `".$wpdb->prefix."adrotate` WHERE `type` = 'empty';");
+
+	// Fetch ads
+	$ads = $wpdb->get_results("SELECT `id` FROM `".$wpdb->prefix."adrotate` ORDER BY `id` ASC;");
+
+	// Determine error states
+	$corrected = 0;
+	foreach($ads as $ad) {
+		$result = adrotate_evaluate_ad($ad->id);
+		if($result == true) $corrected++;
+	}
+
+	adrotate_return('eval_complete', array($corrected));
+}
+
+/*-------------------------------------------------------------
+ Name:      adrotate_evaluate_ad
+
+ Purpose:   Evaluates ads for errors
+ Receive:   $ad_id
+ Return:    String
+ Since:		3.6.5
+-------------------------------------------------------------*/
+function adrotate_evaluate_ad($ad_id) {
+	global $wpdb;
+	
+	// Fetch ad
+	$ad = $wpdb->get_row("SELECT `bannercode`, `tracker`, `link`, `imagetype`, `image` FROM `".$wpdb->prefix."adrotate` WHERE `id` = '$ad_id';");
+	$advertiser = $wpdb->get_var("SELECT `user` FROM `".$wpdb->prefix."adrotate_linkmeta` WHERE `ad` = '$ad_id' AND `group` = 0 AND `block` = 0 AND `user` > 0;");
+
+	// Determine error states
+	if(
+		strlen($ad->bannercode) < 1 
+		OR ($ad->tracker == 'N' AND strlen($ad->link) < 1 AND $advertiser > 0) 							// Didn't enable click-tracking, didn't provide a link, DID set a advertiser
+		OR ($ad->tracker == 'Y' AND strlen($ad->link) < 1) 												// Enabled clicktracking but provided no url (link)
+		OR ($ad->tracker == 'N' AND strlen($ad->link) > 0) 												// Didn't enable click-tracking but did provide an url (link)
+		OR (!preg_match("/%link%/i", $ad->bannercode) AND $ad->tracker == 'Y')							// Didn't use %link% but enabled clicktracking
+		OR (preg_match("/%link%/i", $ad->bannercode) AND $ad->tracker == 'N')							// Did use %link% but didn't enable clicktracking
+		OR (!preg_match("/%image%/i", $ad->bannercode) AND $ad->image != '' AND $ad->imagetype != '')	// Didn't use %image% but selected an image
+		OR (preg_match("/%image%/i", $ad->bannercode) AND $ad->image == '' AND $ad->imagetype == '')	// Did use %image% but didn't select an image
+		OR ($ad->image == '' AND $ad->imagetype != '')													// Critical Image and Imagetype mismatch
+		OR ($ad->image != '' AND $ad->imagetype == '')													// Critical Image and Imagetype mismatch
+	) {
+		$wpdb->query("UPDATE `".$wpdb->prefix."adrotate` SET `type` = 'error' WHERE `id` = '$ad_id';");
+		return true;
+	} else {
+		$wpdb->query("UPDATE `".$wpdb->prefix."adrotate` SET `type` = 'manual' WHERE `id` = '$ad_id';");
+		return false;
+	}
+}
+
+/*-------------------------------------------------------------
  Name:      adrotate_prepare_global_report
 
  Purpose:   Generate live stats for admins
@@ -128,7 +191,7 @@ function adrotate_prepare_global_report() {
 	
 	$today = gmmktime(0, 0, 0, gmdate("n"), gmdate("j"), gmdate("Y"));
 
-	$stats['lastclicks']			= adrotate_array_unique($wpdb->get_results("SELECT `timer`, `bannerid` FROM `".$wpdb->prefix."adrotate_tracker` WHERE `ipaddress` != 0 ORDER BY `timer` DESC LIMIT 4;", ARRAY_A));
+	$stats['lastclicks']			= adrotate_array_unique($wpdb->get_results("SELECT `timer`, `bannerid`, `useragent` FROM `".$wpdb->prefix."adrotate_tracker` WHERE `stat` = 'c' AND `ipaddress` != 0 ORDER BY `timer` DESC LIMIT 50;", ARRAY_A));
 	$stats['banners'] 				= $wpdb->get_var("SELECT COUNT(*) FROM `".$wpdb->prefix."adrotate` WHERE `type` = 'manual';");
 	$stats['tracker']				= $wpdb->get_var("SELECT COUNT(*) FROM `".$wpdb->prefix."adrotate` WHERE `tracker` = 'Y' AND `type` = 'manual';");
 	$stats['clicks']				= $wpdb->get_var("SELECT SUM(`clicks`) as `clicks` FROM `".$wpdb->prefix."adrotate_stats_tracker`;");
@@ -348,7 +411,7 @@ function adrotate_check_banners() {
 	
 	$alreadyexpired = $wpdb->get_var("SELECT COUNT(*) FROM `".$wpdb->prefix."adrotate` WHERE `active` = 'yes' AND `endshow` <= $now;");
 	$expiressoon = $wpdb->get_var("SELECT COUNT(*) FROM `".$wpdb->prefix."adrotate` WHERE `active` = 'yes' AND `endshow` <= $in2days AND `endshow` >= $now;");
-	$error = $wpdb->get_var("SELECT COUNT(*) FROM `".$wpdb->prefix."adrotate` WHERE `type` = 'error';");
+	$error = $wpdb->get_var("SELECT COUNT(*) FROM `".$wpdb->prefix."adrotate` WHERE `active` = 'yes' AND `type` = 'error';");
 
 	$count = $alreadyexpired + $expiressoon + $error;
 	
@@ -381,6 +444,7 @@ function adrotate_check_config() {
 	// Feb 28 2011 - Revamped debug option with array()
 	// Jul 6 2011 - Renewed crawlers
 	// Jul 11 2011 - Added option for impression timer
+	// Aug 10 2011 - Removed sortorder option
 	*/
 	
 	$config 	= get_option('adrotate_config');
@@ -398,10 +462,9 @@ function adrotate_check_config() {
 	if($config['notification_email_switch'] == '' OR !isset($config['notification_email_switch']))	$config['notification_email_switch']	= 'Y';
 	if(($config['notification_email'] == '' OR !isset($config['notification_email']) OR !is_array($config['notification_email'])) AND $config['notification_email_switch'] == 'Y')	$config['notification_email']	= array(get_option('admin_email'));
 	if($config['advertiser_email'] == '' OR !isset($config['advertiser_email']) OR !is_array($config['advertiser_email']))	$config['advertiser_email']	= array(get_option('admin_email'));
-	if($config['sortorder'] == '' OR !isset($config['sortorder']))					$config['sortorder'] 			= 'id ASC';
 	if($config['credits'] == '' OR !isset($config['credits']))						$config['credits'] 				= 'Y';
 	if($config['widgetalign'] == '' OR !isset($config['widgetalign']))				$config['widgetalign'] 			= 'N';
-	if($config['impression_timer'] == '' OR !isset($config['impression_timer']))	$config['impression_timer'] 	= '300';
+	if($config['impression_timer'] == '' OR !isset($config['impression_timer']))	$config['impression_timer'] 	= '10';
 	update_option('adrotate_config', $config);
 
 	if($crawlers == '' OR !isset($crawlers)) 										$crawlers 						= array("Teoma", "alexa", "froogle", "Gigabot", "inktomi","looksmart", "URL_Spider_SQL", "Firefly", "NationalDirectory","Ask Jeeves", "TECNOSEEK", "InfoSeek", "WebFindBot", "girafabot","www.galaxy.com", "Googlebot", "Scooter", "Slurp","msnbot", "appie", "FAST", "WebBug", "Spade", "ZyBorg", "rabaz","Baiduspider", "Feedfetcher-Google", "TechnoratiSnoop", "Rankivabot","Mediapartners-Google", "Sogou web spider", "WebAlta Crawler","bot", "crawler", "yahoo", "msn", "ask", "ia_archiver");
@@ -1010,6 +1073,10 @@ function adrotate_return($action, $arg = null) {
 
 		case "db_timer" :
 			wp_redirect('admin.php?page=adrotate-settings&message=db_timer');
+		break;
+
+		case "eval_complete" :
+			wp_redirect('admin.php?page=adrotate-settings&message=eval_complete&corrected='.$arg[0]);
 		break;
 
 		// Misc plugin events

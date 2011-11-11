@@ -46,12 +46,7 @@ yoast_breadcrumb('<div id="con-breadcrumbs"><div id="breadcrumbs">','</div></div
 				<?php query_posts( 'post_type=providers&order=asc'); ?>
 				 
 				<?php if ( have_posts() ) while ( have_posts() ) : the_post(); ?>
-				<div class="box-text">
-				
-				
-						
-		
-				
+				<div class="box-text">			
 				
 				<div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 					<div class="entry-content">

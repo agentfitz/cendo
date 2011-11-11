@@ -27,7 +27,7 @@ function adrotate_ad($banner_id, $individual = true, $group = 0, $block = 0) {
 	// Jul 6 2011 - Expanded impression filter to not count every page load
 	// Jul 11 2011 - Added call to change the impression timer
 	*/
-	
+
 	$now 				= date('U');
 	$today 				= gmmktime(0, 0, 0, gmdate("n"), gmdate("j"), gmdate("Y"));
 	$useragent 			= $_SERVER['HTTP_USER_AGENT'];
@@ -58,7 +58,7 @@ function adrotate_ad($banner_id, $individual = true, $group = 0, $block = 0) {
 		if($adrotate_debug['timers'] == true) {
 			$impression_timer = $now;
 		} else {
-			$impression_timer = $now + $adrotate_config['impression_timer'];
+			$impression_timer = $now - $adrotate_config['impression_timer'];
 		}
 		
 		if($banner) {
@@ -81,7 +81,7 @@ function adrotate_ad($banner_id, $individual = true, $group = 0, $block = 0) {
 				} else {
 					$wpdb->query("INSERT INTO `".$wpdb->prefix."adrotate_stats_tracker` (`ad`, `group`, `block`, `thetime`, `clicks`, `impressions`) VALUES ('$banner_id', '$group', '$block', '$today', '0', '1');");
 				}
-				$wpdb->query("INSERT INTO `".$wpdb->prefix."adrotate_tracker` (`ipaddress`, `timer`, `bannerid`, `stat`) VALUES ('$remote_ip', '$now', '$banner_id', 'i');");
+				$wpdb->query("INSERT INTO `".$wpdb->prefix."adrotate_tracker` (`ipaddress`, `timer`, `bannerid`, `stat`, `useragent`) VALUES ('$remote_ip', '$now', '$banner_id', 'i', '');");
 			}
 		} else {
 			$output = adrotate_error('ad_expired', array($banner_id));
@@ -193,10 +193,10 @@ function adrotate_group($group_ids, $fallback = 0, $weight = 0) {
 				$selected[$result->id] = $result->weight;
 
 				if($stats->clicks >= $result->maxclicks AND $result->maxclicks > 0 AND $result->tracker == "Y") {
-					$selected = array_diff_key($selected, array($result->id => $result->weight));
+					$selected = array_diff_key($selected, array($result->id => $result->maxclicks));
 				}
 				if($stats->impressions >= $result->maxshown AND $result->maxshown > 0) {
-					$selected = array_diff_key($selected, array($result->id => $result->weight));
+					$selected = array_diff_key($selected, array($result->id => $result->maxshown));
 				}
 			}
 
@@ -351,10 +351,10 @@ function adrotate_block($block_id, $weight = 0) {
 						$selected[$result->id] = $result->weight;
 
 						if($stats->clicks >= $result->maxclicks AND $result->maxclicks > 0 AND $result->tracker == "Y") {
-							$selected = array_diff_key($selected, array($result->id => $result->weight));
+							$selected = array_diff_key($selected, array($result->id => $result->maxclicks));
 						}
 						if($stats->impressions >= $result->maxshown AND $result->maxshown > 0) {
-							$selected = array_diff_key($selected, array($result->id => $result->weight));
+							$selected = array_diff_key($selected, array($result->id => $result->maxshown));
 						}
 					}
 
@@ -507,8 +507,7 @@ function adrotate_preview($banner_id) {
 -------------------------------------------------------------*/
 function adrotate_ad_output($id, $group = 0, $block = 0, $bannercode, $tracker, $link, $image, $preview = false) {
 
-	$meta = urlencode("$id,$group,$block");
-	list($type, $file) = explode("|", $image, 2);
+	$meta = base64_encode("$id,$group,$block");
 
 	$banner_output = $bannercode;
 	if($tracker == "Y") {
@@ -520,7 +519,7 @@ function adrotate_ad_output($id, $group = 0, $block = 0, $bannercode, $tracker, 
 	} else {
 		$banner_output = str_replace('%link%', $link, $banner_output);
 	}
-	$banner_output = str_replace('%image%', $file, $banner_output);
+	$banner_output = str_replace('%image%', $image, $banner_output);
 	$banner_output = str_replace('%id%', $id, $banner_output);
 	$banner_output = stripslashes(htmlspecialchars_decode($banner_output, ENT_QUOTES));
 
@@ -606,7 +605,7 @@ function adrotate_credits() {
 	echo '	<li>'.__('Give me your money to', 'adrotate').' <a href="http://meandmymac.net/donate/" target="_blank">'.__('show your appreciation', 'adrotate').'</a>. '.__('Thanks!', 'adrotate').'</li>';
 	echo '	<li>'.__('The plugin homepage is at', 'adrotate').' <a href="http://www.adrotateplugin.com/" target="_blank">www.adrotateplugin.com</a>!</li>';
 	echo '	<li>'.__('Check out the', 'adrotate').' <a href="http://www.adrotateplugin.com/page/support.php" target="_blank">'.__('knowledgebase', 'adrotate').'</a> '.__('for manuals, general information!', 'adrotate').'</li>';
-	echo '	<li>'.__('Need more help?', 'adrotate').' <a href="http://www.adrotateplugin.com/page/support.php" target="_blank">'.__('Ticket support', 'adrotate').'</a> '.__('is available!', 'adrotate').'</li>';
+	echo '	<li>'.__('Need more help?', 'adrotate').' <a href="http://www.adrotateplugin.com/page/support.php" target="_blank">'.__('Forum support', 'adrotate').'</a> '.__('is available!', 'adrotate').'</li>';
 	echo '</ul></td>';
 	echo '<td style="border-left:1px #ddd solid;">';
 	meandmymac_rss_widget(5);

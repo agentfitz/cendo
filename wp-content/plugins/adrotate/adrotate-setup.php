@@ -90,24 +90,26 @@ function adrotate_database_install() {
 
 	if(!$wpdb->get_var("SHOW TABLES LIKE '".$tables['adrotate']."'")) { // wp_adrotate
 		$sql = "CREATE TABLE `".$tables['adrotate']."` (
-			  `id` mediumint(8) unsigned NOT NULL auto_increment,
-			  `title` longtext NOT NULL,
-			  `bannercode` longtext NOT NULL,
-			  `thetime` int(15) NOT NULL default '0',
-			  `updated` int(15) NOT NULL,
-			  `author` varchar(60) NOT NULL default '',
-			  `active` varchar(4) NOT NULL default 'yes',
-			  `startshow` int(15) NOT NULL default '0',
-			  `endshow` int(15) NOT NULL default '0',
-			  `image` varchar(255) NOT NULL,
-			  `link` longtext NOT NULL,
-			  `tracker` varchar(5) NOT NULL default 'N',
-			  `maxclicks` int(15) NOT NULL default '0',
-			  `maxshown` int(15) NOT NULL default '0',			  
-			  `targetclicks` int(15) NOT NULL default '0',			  
-			  `targetimpressions` int(15) NOT NULL default '0',			  
-			  `type` varchar(10) NOT NULL default '0',
-			  `weight` int(3) NOT NULL default '6',
+			  	`id` mediumint(8) unsigned NOT NULL auto_increment,
+			  	`title` longtext NOT NULL,
+			  	`bannercode` longtext NOT NULL,
+			  	`thetime` int(15) NOT NULL default '0',
+				`updated` int(15) NOT NULL,
+			  	`author` varchar(60) NOT NULL default '',
+			  	`active` varchar(4) NOT NULL default 'yes',
+			  	`startshow` int(15) NOT NULL default '0',
+			  	`endshow` int(15) NOT NULL default '0',
+			  	`imagetype` varchar(9) NOT NULL,
+			  	`image` varchar(255) NOT NULL,
+			  	`link` longtext NOT NULL,
+			  	`tracker` varchar(5) NOT NULL default 'N',
+			  	`maxclicks` int(15) NOT NULL default '0',
+			  	`maxshown` int(15) NOT NULL default '0',			  
+			  	`targetclicks` int(15) NOT NULL default '0',			  
+			  	`targetimpressions` int(15) NOT NULL default '0',			  
+			  	`type` varchar(10) NOT NULL default '0',
+			  	`weight` int(3) NOT NULL default '6',
+				`sortorder` int(5) NOT NULL default '0',
 	  		PRIMARY KEY  (`id`)
 			) ".$charset_collate.";";
 		dbDelta($sql);
@@ -118,6 +120,7 @@ function adrotate_database_install() {
 				`id` mediumint(8) unsigned NOT NULL auto_increment,
 				`name` varchar(255) NOT NULL default 'group',
 				`fallback` varchar(5) NOT NULL default '0',
+				`sortorder` int(5) NOT NULL default '0',
 				PRIMARY KEY  (`id`)
 			) ".$charset_collate.";";
 		dbDelta($sql);
@@ -130,6 +133,7 @@ function adrotate_database_install() {
 				`timer` int(15) NOT NULL default '0',
 				`bannerid` int(15) NOT NULL default '0',
 				`stat` char(1) NOT NULL default 'c',
+				`useragent` mediumtext NOT NULL,
 				PRIMARY KEY  (`id`)
 			) ".$charset_collate.";";
 		dbDelta($sql);
@@ -143,6 +147,7 @@ function adrotate_database_install() {
 				`columns` int(3) NOT NULL default '1',
 				`wrapper_before` longtext NOT NULL,
 				`wrapper_after` longtext NOT NULL,
+				`sortorder` int(5) NOT NULL default '0',
 				PRIMARY KEY  (`id`)
 			) ".$charset_collate.";";
 		dbDelta($sql);
@@ -284,6 +289,33 @@ function adrotate_database_upgrade() {
 			$wpdb->query("UPDATE `".$tables['adrotate_tracker']."` SET `stat` = 'c' WHERE `stat` = '';");
 		}
 		
+		// Database: 	11
+		// AdRotate: 	3.6.4
+		if($adrotate_db_version < 11) {
+			adrotate_add_column($tables['adrotate'], 'sortorder', 'int(5) NOT NULL DEFAULT \'0\' AFTER `weight`');
+			adrotate_add_column($tables['adrotate_groups'], 'sortorder', 'int(5) NOT NULL DEFAULT \'0\' AFTER `fallback`');
+			adrotate_add_column($tables['adrotate_blocks'], 'sortorder', 'int(5) NOT NULL DEFAULT \'0\' AFTER `wrapper_after`');
+
+			// Convert image data to accomodate version 3.6.4 and up from earlier setups
+			adrotate_add_column($tables['adrotate'], 'imagetype', 'varchar(10) NOT NULL AFTER `endshow`');
+
+			$images = $wpdb->get_results("SELECT `id`, `image` FROM ".$tables['adrotate']." ORDER BY `id` ASC;");
+			foreach($images as $image) {
+				if(strlen($image->image) > 0) {
+					if(preg_match("/dropdown|/i", $image->image) OR preg_match("/field|/i", $image->image)) {
+						$buffer = explode("|", $image->image, 3);
+						$wpdb->query("UPDATE `".$tables['adrotate']."` SET `imagetype` = '".$buffer[0]."', `image` = '".$buffer[1]."' WHERE `id` = '$image->id';");
+					}
+				}
+			}
+		}
+
+		// Database: 	12
+		// AdRotate: 	3.6.5
+		if($adrotate_db_version < 12) {
+			adrotate_add_column($tables['adrotate_tracker'], 'useragent', 'mediumtext NOT NULL AFTER `stat`');
+		}
+
 		update_option("adrotate_db_version", ADROTATE_DB_VERSION);
 	}
 }

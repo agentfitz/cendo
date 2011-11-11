@@ -346,14 +346,14 @@ h1, h2, h3, h4, h5, h6{ font-weight:normal; color:#505050;}
 	padding:0px 0px;
 	background-image:none;
 	border-bottom:solid 1px #454545;
-	font-size:12px;
+	font-size:13px;
 	z-index:100 !important;
 	line-height:20px;
 }
 #topnavigation ul ul {
 	position:absolute;
 	display:none;
-	width:140px;
+	width:160px;
 	top:58px;
 	left:5px;
 	background-color:#252525;
@@ -362,7 +362,7 @@ h1, h2, h3, h4, h5, h6{ font-weight:normal; color:#505050;}
 	padding:0;
 }
 #topnavigation li ul a{
-	width:100px;
+	width:120px;
 	height:auto;
 	margin:0 15px;
 	background-repeat:repeat-x;
@@ -1382,7 +1382,7 @@ height:70px;
 #highlightList img { float: left; margin-right: 18px; }
 #highlightList h3 { margin-top: 0; padding-top: 0; }
 
-span.sliderTitle { color: #fff; font-size: 30px; padding-right: 6px; }
+span.sliderTitle { color: #fff; font-size: 28px; padding-right: 6px; }
 .nivo-caption p { font-size: 18px; font-weight: normal; }
 
 li.Contact_Widget div.side-box, div#providersSidebarContainer { padding: 12px !important; }

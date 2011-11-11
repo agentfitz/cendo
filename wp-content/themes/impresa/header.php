@@ -120,7 +120,7 @@ if($favicon =="" ){
 	});
 	 
 </script>
-<!--[if IE]>
+<!--[if lt IE 8]>
 <script type="text/JavaScript" src="<?php bloginfo('template_url'); ?>/js/DD_belatedPNG.js"></script>
 <![endif]-->
 
