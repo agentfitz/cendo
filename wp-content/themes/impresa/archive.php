@@ -19,8 +19,7 @@ yoast_breadcrumb('<div id="con-breadcrumbs"><div id="breadcrumbs">','</div></div
 } ?>
 
 <div id="main">
-	<div id="content">
-	
+	<div id="content">	
 		<?php
 			/* Queue the first post, that way we know
 			 * what date we're dealing with (if that is the case).

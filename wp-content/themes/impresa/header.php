@@ -71,7 +71,6 @@ if($favicon =="" ){
 	$slices = get_option('templatesquare_slider_slices');
 	$speed = get_option('templatesquare_slider_speed');
 	$timeout = get_option('templatesquare_slider_timeout');
-
  ?>
 <script type="text/javascript">
    jQuery(document).ready(function($) {     
@@ -123,7 +122,6 @@ if($favicon =="" ){
 <!--[if lt IE 8]>
 <script type="text/JavaScript" src="<?php bloginfo('template_url'); ?>/js/DD_belatedPNG.js"></script>
 <![endif]-->
-
 </head>
 
 <body <?php if(!is_front_page()){echo 'class="body-page"';}?>>
@@ -131,10 +129,10 @@ if($favicon =="" ){
 		<div id="container">
 			<div id="top">
 			<?php
-			$logotype = get_option('templatesquare_logo_type');
-			$logoimage = get_option('templatesquare_logo_image'); 
-			$sitename = get_option('templatesquare_site_name');
-			if($logoimage == ""){ $logoimage = get_bloginfo('template_url') . "/images/logo.png"; }
+				$logotype = get_option('templatesquare_logo_type');
+				$logoimage = get_option('templatesquare_logo_image'); 
+				$sitename = get_option('templatesquare_site_name');
+				if($logoimage == ""){ $logoimage = get_bloginfo('template_url') . "/images/logo.png"; }
 			?>
 			<?php if($logotype == 'textlogo'){ ?>
 			<div id="logo">
@@ -170,4 +168,4 @@ if($favicon =="" ){
 			if(is_front_page()){
 				include_once(TEMPLATEPATH .'/slider.php');
 			}
-			 ?>
+			?>

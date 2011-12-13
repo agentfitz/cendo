@@ -64,7 +64,7 @@
 					<img src="/wp-content/themes/impresa/images/portalThumb.jpg" width="170" height="120" />
 					<p style="margin: 0; font-size: 12px;">Login to our Patient Portal to schedule appointments, refill prescriptions, and more!</p>
 					<div style="margin: 10px 0 15px 0;">
-						<a href="/?page_id=162" id="patientPortal" style="padding: 4px 8px; background: #66b451; border: 1px solid #5daa48; color: #fff; font-weight: bold; text-transform: uppercase; font-size: 10px;-webkit-border-radius: 3px; -moz-border-radius: 3px; border-radius: 3px;">get started</a>
+						<a href="/?page_id=162" id="patientPortal" class="button small">get started</a>
 					</div>
 				</div>
 			</div>

@@ -22,7 +22,7 @@ class TS_TextWidget extends WP_Widget {
 					 <?php if ( $title )
 					 echo $before_title . $title . $after_title; ?>
 					<div class="box-text">
-						<?php echo $text;?>
+						<p><?php echo $text;?></p>
 					</div>
 					</div><!-- .main-box -->
 				</div><!-- .box-type1 -->

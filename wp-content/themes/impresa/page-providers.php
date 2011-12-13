@@ -51,7 +51,7 @@ yoast_breadcrumb('<div id="con-breadcrumbs"><div id="breadcrumbs">','</div></div
 				<div id="post-<?php the_ID(); ?>" <?php post_class(); ?>>
 					<div class="entry-content">
 						<a href="#" name="<?php the_ID() ?>"></a>
-						<?php the_post_thumbnail(); ?>
+						<?php the_post_thumbnail('full', array( 'class' => 'providerPic', 'height' => '300', 'width' => '240') ); ?>
 						<h2><?php the_title(); ?></h2>
 						<?php the_content( __( 'Continue Reading', 'templatesquare' ) ); ?>
 						<?php wp_link_pages( array( 'before' => '<div class="page-link">' . __( 'Pages:', 'templatesquare' ), 'after' => '</div>' ) ); ?>

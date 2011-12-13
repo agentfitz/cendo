@@ -55,7 +55,7 @@ class Providers_Widget extends WP_Widget
 		 $imgArr = wp_get_attachment_image_src($thumbId, 'single-post-thumbnail');
 		 $imgSrc = $imgArr[0];
 		 
-		 echo "<div class='providerSideBlock'><a href='" . $providerUrl . "'><img src='" . $imgSrc . "' width='110' height='81' /></a>";
+		 echo "<div class='providerSideBlock'><a href='" . $providerUrl . "'><img src='" . $imgSrc . "' width='80' height='100' /></a>";
 		 echo "<h5><a href='" . $providerUrl . "'>" . $thisPost->post_title . '</a></h5>';
 		 echo "<p>" . $thisPost->post_excerpt . " <a href='" . $providerUrl . "'>read more</a></p></div></a>";
 		 

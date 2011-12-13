@@ -12,7 +12,6 @@ get_header(); ?>
 <?php if ( function_exists('yoast_breadcrumb') && !is_front_page() ) {
 yoast_breadcrumb('<div id="con-breadcrumbs"><div id="breadcrumbs">','</div></div>');
 } ?>
-
 <div id="main">
 	<div id="content">
 			<?php if ( have_posts() ) while ( have_posts() ) : the_post(); ?>
@@ -42,6 +41,13 @@ yoast_breadcrumb('<div id="con-breadcrumbs"><div id="breadcrumbs">','</div></div
 						<?php ts_posted_in(); ?>
 						<?php edit_post_link( __( 'Edit', 'templatesquare' ), '<span class="edit-link">', '</span>' ); ?>
 					</div><!-- .entry-utility -->
+					
+					<div id="commentInvite">
+						<h2>Share your thoughts!</h2>
+						<p>&nbsp; Post a <strong>public</strong> comment below, or if you'd prefer, 
+							share your feedback <strong>privately</strong> or anonymously <a href="/contact">by contacting us directly</a>.
+						</p>
+					</div>
 					
 					</div><!-- .boxt-text -->
 					
